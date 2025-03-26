@@ -52,3 +52,10 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+*.v2
+*.suo
+/.vs/DotNet-CleanArchitecture-WebAPI/v17/DocumentLayout.backup.json
+/.vs/DotNet-CleanArchitecture-WebAPI/v17/DocumentLayout.json
+*.v9.bin
+*.vsidx
+/.vs/DotNet-CleanArchitecture-WebAPI/config/applicationhost.config
