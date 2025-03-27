@@ -59,3 +59,4 @@ nunit-*.xml
 *.v9.bin
 *.vsidx
 /.vs/DotNet-CleanArchitecture-WebAPI/config/applicationhost.config
+/App.API/appsettings.Development.json

@@ -11,7 +11,7 @@ namespace App.Persistence.Extensions;
 
 public static class RepositoryExtensions
 {
-    public static IServiceCollection AddRepositories(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddRepositoriesExt(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
         {

@@ -1,16 +1,25 @@
-﻿using App.Application.Contracts.Persistence;
+﻿using App.Application.Contracts.Caching;
+using App.Application.Contracts.Persistence;
+using App.Application.Contracts.ServiceBus;
 using App.Application.Features.Products.Create;
 using App.Application.Features.Products.Dto;
 using App.Application.Features.Products.Update;
 using App.Domain.Entities;
 using App.Domain.Entities.Common;
+using App.Domain.Events;
 using AutoMapper;
 using System.Net;
 
 namespace App.Application.Features.Products;
 
-public class ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork, IMapper mapper) : IProductService
+public class ProductService(
+    IProductRepository productRepository,
+    IUnitOfWork unitOfWork,
+    IMapper mapper,
+    ICacheService cacheService,
+    IServiceBus serviceBus) : IProductService
 {
+    private const string ProductListCacheKey = "ProductListCacheKey";
     public async Task<ServiceResult<IEnumerable<ProductDto>>> GetTopPriceProductsAsync(int count)
     {
         var products = await productRepository.GetTopPriceProductsAsync(count);
@@ -22,9 +31,16 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
 
     public async Task<ServiceResult<IEnumerable<ProductDto>>> GetAllAsync()
     {
+        // cache aside design patter
+        var productListAsCached = await cacheService.GetAsync<IEnumerable<ProductDto>>(ProductListCacheKey);
+
+        if(productListAsCached is not null) return ServiceResult<IEnumerable<ProductDto>>.Success(productListAsCached);
+
         var products = await productRepository.GetAllAsync();
 
         var productsAsDto = mapper.Map<List<ProductDto>>(products);
+
+        await cacheService.AddAsync(ProductListCacheKey, productsAsDto, TimeSpan.FromMinutes(1));
 
         return ServiceResult<IEnumerable<ProductDto>>.Success(productsAsDto);
     }
@@ -70,6 +86,8 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
 
         await productRepository.AddAsync(product);
         await unitOfWork.SaveChangesAsync();
+
+        await serviceBus.PublishAsync(new ProductAddedEvent(product.Id, product.Name, product.Price));
 
         return ServiceResult<int>.SuccessAsCreated(product.Id, $"/api/Products/GetById?id={product.Id}");
     }

@@ -10,7 +10,7 @@ namespace App.Application.Extensions;
 
 public static class ApplicationExtensions
 {
-    public static IServiceCollection AddServices(this IServiceCollection services)
+    public static IServiceCollection AddServicesExt(this IServiceCollection services)
     {
         services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
